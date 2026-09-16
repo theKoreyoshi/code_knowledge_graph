@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "code-kg"
+version = "2.0.0"
+description = "Zero-configuration code knowledge graph builder for C/C++ (clang + tree-sitter)"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+dependencies = [
+  "libclang>=16,<19",
+  "tree-sitter>=0.22",
+  "tree-sitter-c>=0.21",
+]
+
+[project.optional-dependencies]
+preprocess = ["ziglang>=0.13"]
+
+[project.scripts]
+ckg = "ckg.cli:main"
+
+[tool.setuptools]
+packages = ["ckg"]
+
+[tool.setuptools.package-data]
+ckg = ["shims/*.h", "templates/*"]

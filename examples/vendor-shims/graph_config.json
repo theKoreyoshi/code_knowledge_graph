@@ -1,0 +1,19 @@
+{
+  "project_name": "embedded-demo",
+  "title": "嵌入式工程代码知识图谱（使用厂商头文件桩）",
+  "source_root": "C:/path/to/your/embedded-project",
+  "output_dir": "./ckg-out",
+
+  "include_dirs": ["inc"],
+  "std_shim_dirs": ["../../ckg/shims"],
+  "shim_include_dirs": ["shims"],
+
+  "defines": [],
+  "extra_args": ["-Wno-implicit-function-declaration"],
+  "std": "gnu11",
+  "target": "arm-none-eabi",
+
+  "auto_repair": true,
+  "tree_sitter": true,
+  "preprocess": true
+}

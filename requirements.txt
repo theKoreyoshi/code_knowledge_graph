@@ -1,0 +1,7 @@
+# clang frontend library (ships libclang.dll / .so, no full LLVM install needed)
+libclang>=16,<19
+# tree-sitter runtime + prebuilt C grammar (no compiler needed on Windows)
+tree-sitter>=0.22
+tree-sitter-c>=0.21
+# optional: bundles a clang 21 driver used for the real `clang -E` preprocessing pass
+ziglang>=0.13

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>__TITLE__</title>
+<style>
+  :root{
+    --bg:#0b1020; --bg2:#121a33; --panel:#0f172e; --panel2:#151f3d;
+    --line:#243154; --text:#e6edf7; --muted:#8b9ac0; --accent:#4cc9f0; --warn:#f59e0b;
+    --shadow:0 10px 30px rgba(0,0,0,.45);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--text);
+    font-family:"Segoe UI","Microsoft YaHei",system-ui,-apple-system,sans-serif;overflow:hidden}
+  #app{display:grid;grid-template-columns:300px 1fr 372px;grid-template-rows:56px 1fr 30px;height:100vh}
+  header{grid-column:1/4;display:flex;align-items:center;gap:18px;padding:0 18px;
+    background:linear-gradient(90deg,#0d1530,#132048 60%,#0d1530);border-bottom:1px solid var(--line)}
+  header h1{font-size:15px;margin:0;font-weight:600;letter-spacing:.3px;white-space:nowrap}
+  header .badge{font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:20px;padding:3px 10px}
+  header .grow{flex:1}
+  #search{width:280px;background:var(--panel);border:1px solid var(--line);border-radius:8px;
+    color:var(--text);padding:7px 11px;font-size:13px;outline:none}
+  #search:focus{border-color:var(--accent)}
+  select,.btn{background:var(--panel);border:1px solid var(--line);color:var(--text);border-radius:8px;
+    padding:7px 11px;font-size:12.5px;cursor:pointer}
+  .btn:hover,select:hover{border-color:var(--accent)}
+  aside{background:var(--panel);border-right:1px solid var(--line);overflow-y:auto;padding:12px}
+  #inspector{background:var(--panel);border-left:1px solid var(--line);overflow-y:auto;padding:12px}
+  #stage{position:relative;background:
+      radial-gradient(1200px 700px at 70% 20%,#16224a 0%,#0b1020 60%) }
+  canvas{display:block;width:100%;height:100%;cursor:grab}
+  canvas.dragging{cursor:grabbing}
+  footer{grid-column:1/4;display:flex;align-items:center;gap:14px;padding:0 16px;font-size:11.5px;
+    color:var(--muted);background:var(--panel);border-top:1px solid var(--line)}
+  .sec{margin-bottom:14px}
+  .sec h3{margin:0 0 8px;font-size:11.5px;text-transform:uppercase;letter-spacing:.9px;color:var(--muted);font-weight:600}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{display:flex;align-items:center;gap:6px;font-size:12px;padding:4px 9px 4px 7px;border-radius:20px;
+    border:1px solid var(--line);background:#0c142b;cursor:pointer;user-select:none;transition:.12s}
+  .chip:hover{border-color:#39507f}
+  .chip.on{background:#16264d;border-color:#3b5ea8}
+  .chip .dot{width:9px;height:9px;border-radius:50%;box-shadow:0 0 8px currentColor}
+  .chip .n{color:var(--muted);font-size:10.5px}
+  .chip.off{opacity:.42}
+  .presets{display:grid;gap:6px}
+  .preset{text-align:left;font-size:12.5px;padding:8px 10px;border-radius:8px;border:1px solid var(--line);
+    background:#0c142b;cursor:pointer;color:var(--text)}
+  .preset:hover{border-color:var(--accent)}
+  .preset.active{background:linear-gradient(90deg,#16305e,#122348);border-color:var(--accent)}
+  .preset small{display:block;color:var(--muted);font-size:10.5px;margin-top:2px}
+  label.row{display:flex;align-items:center;gap:8px;font-size:12.5px;padding:5px 0;cursor:pointer}
+  input[type=range]{width:100%}
+  .kv{font-size:12.5px;line-height:1.6;color:#cbd6ea}
+  .kv b{color:var(--text);font-weight:600}
+  .kv code,pre{font-family:"Cascadia Code",Consolas,monospace;font-size:11.5px}
+  pre{background:#0a1224;border:1px solid var(--line);
+    border-radius:8px;padding:9px 10px;overflow:auto;max-height:230px;white-space:pre-wrap;word-break:break-all;color:#cfe3ff}
+  #right h2{margin:2px 0 4px;font-size:17px;line-height:1.35}
+  .tagline{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+  .tag{font-size:10.5px;padding:2px 8px;border-radius:20px;border:1px solid var(--line);color:var(--muted)}
+  .tag.type{color:#0b1020;font-weight:700;border:none}
+  .relgrp{margin-top:10px}
+  .relgrp .h{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;margin-bottom:5px}
+  .rel{display:flex;align-items:center;gap:7px;font-size:12px;padding:4px 7px;border-radius:6px;cursor:pointer}
+  .rel:hover{background:#16264d}
+  .rel .arrow{color:var(--muted);font-size:10px}
+  .rel .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .rel .badge2{font-size:10px;color:var(--muted);border:1px solid var(--line);border-radius:10px;padding:0 6px}
+  #legend{position:absolute;left:14px;bottom:14px;background:rgba(12,20,43,.86);border:1px solid var(--line);
+    border-radius:10px;padding:9px 11px;font-size:11px;color:#c3cfe6;backdrop-filter:blur(6px);max-width:420px}
+  #legend .row{display:flex;flex-wrap:wrap;gap:9px}
+  #legend .k{display:flex;align-items:center;gap:5px;margin-right:4px}
+  #legend .sw{width:14px;height:3px;border-radius:2px}
+  #hud{position:absolute;right:14px;top:12px;font-size:11px;color:var(--muted);
+    background:rgba(12,20,43,.8);border:1px solid var(--line);border-radius:8px;padding:6px 10px}
+  .empty{color:var(--muted);font-size:12.5px;line-height:1.7}
+  .warnbox{background:#2a1e0a;border:1px solid #5b4318;border-radius:8px;padding:8px 10px;font-size:12px;
+    color:#f0c477;margin-bottom:10px}
+  ::-webkit-scrollbar{width:9px;height:9px}
+  ::-webkit-scrollbar-thumb{background:#26325a;border-radius:6px}
+  ::-webkit-scrollbar-track{background:transparent}
+  .pill{display:inline-flex;gap:6px;align-items:center}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <h1>__TITLE__</h1>
+    <span class="badge" id="stat-badge"></span>
+    <span class="grow"></span>
+    <input id="search" type="search" placeholder="搜索函数 / 变量 / 宏 / 文件…   ( / 聚焦)" autocomplete="off" list="search-list">
+    <datalist id="search-list"></datalist>
+    <select id="layout" title="布局">
+      <option value="force">力导向布局</option>
+      <option value="cluster">按文件聚类</option>
+      <option value="hub">以枢纽为中心</option>
+      <option value="grid">网格</option>
+    </select>
+    <button class="btn" id="btn-fit">适应窗口</button>
+    <button class="btn" id="btn-expand">展开计算</button>
+  </header>
+  <aside id="left">
+    <div class="sec">
+      <h3>视图预设</h3>
+      <div class="presets" id="presets"></div>
+    </div>
+    <div class="sec">
+      <h3>实体类型 <span class="n" id="cnt-entities"></span></h3>
+      <div class="chips" id="type-chips"></div>
+    </div>
+    <div class="sec">
+      <h3>关系类型 <span class="n" id="cnt-relations"></span></h3>
+      <div class="chips" id="rel-chips"></div>
+    </div>
+    <div class="sec">
+      <h3>显示选项</h3>
+      <label class="row"><input type="checkbox" id="opt-external"> 显示工程外部符号（驱动/标准库）</label>
+      <label class="row"><input type="checkbox" id="opt-isolate"> 仅显示选中节点的邻域</label>
+      <label class="row"><input type="checkbox" id="opt-labels" checked> 显示节点标签</label>
+      <label class="row"><input type="checkbox" id="opt-curves" checked> 曲线连边</label>
+      <div style="margin-top:8px">
+        <div class="kv">邻域深度 <b id="depth-val">2</b> 跳</div>
+        <input type="range" id="opt-depth" min="1" max="5" value="2">
+      </div>
+      <div style="margin-top:8px">
+        <div class="kv">斥力 <b id="rep-val">1.0</b></div>
+        <input type="range" id="opt-rep" min="30" max="260" value="120">
+      </div>
+    </div>
+    <div class="sec">
+      <h3>图谱构成</h3>
+      <div class="kv" id="breakdown"></div>
+    </div>
+  </aside>
+  <div id="stage">
+    <canvas id="cv"></canvas>
+    <div id="hud"></div>
+    <div id="legend"></div>
+  </div>
+  <aside id="right">
+    <div id="inspector-content"><div class="empty">点击任意节点查看详情：源码位置、宏展开后的真实代码、上下游关系。<br><br>滚轮缩放 · 拖拽空白平移 · 拖拽节点调整 · 双击节点聚焦邻域。</div></div>
+  </aside>
+  <footer>
+    <span id="foot-left"></span>
+    <span class="grow" style="flex:1"></span>
+    <span id="foot-right"></span>
+  </footer>
+</div>
+<script id="graph-data" type="application/json">__DATA__</script>
+<script>
+__SCRIPT__
+</script>
+</body>
+</html>

@@ -1,0 +1,40 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+.mypy_cache/
+.pytest_cache/
+build/
+dist/
+
+# --- code-kg 生成物 ---
+ckg-out/
+**/ckg-out/
+output/
+**/output/
+preprocessed/
+_auto_shim/
+_toolchain/
+examples/validation/
+
+# 生成图谱的常见文件名（避免误提交）
+graph_stats.json
+run_meta.json
+toolchain.json
+macro_expansions.json
+macro_expansions_detailed.json
+graph.graphml
+
+# --- 编辑器 / 系统 ---
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# --- zig 缓存（clang 驱动预处理时产生）---
+.zig-cache/
+zig-cache/
