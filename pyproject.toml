@@ -20,6 +20,7 @@ preprocess = ["ziglang>=0.13"]
 
 [project.scripts]
 ckg = "ckg.cli:main"
+ckg-mcp = "ckg.mcp_server:main"
 
 [tool.setuptools]
 packages = ["ckg"]

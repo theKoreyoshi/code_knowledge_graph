@@ -154,6 +154,7 @@ python -m ckg query <符号> -d out        # 查某个函数/变量/宏的上下
 python -m ckg context <符号> -d out --format json # 输出 AI 使用的受限上下文
 python -m ckg impact <符号> -d out --format json  # 分析修改影响范围
 python -m ckg tools                       # 导出 AI 工具定义
+python -m ckg.mcp_server --graph-dir out    # 以 MCP stdio 服务启动
 python -m ckg viz -d out                 # 只重新生成 HTML
 python -m ckg info                       # 显示识别到的工具链
 ```
