@@ -11,6 +11,8 @@ import time
 from . import __version__, autoconfig
 from .config import ProjectConfig
 from .pipeline import Pipeline, build_from_path
+from .retriever import GraphRetriever
+from .store import GraphStore
 
 
 def log(message: str = "") -> None:
@@ -158,6 +160,68 @@ def cmd_query(args) -> int:
     return 0
 
 
+def _print_json(data: dict) -> int:
+    print(json.dumps(data, ensure_ascii=False, indent=2, default=str))
+    return 0
+
+
+def cmd_context(args) -> int:
+    retriever = GraphRetriever(GraphStore(args.dir))
+    result = retriever.context(
+        args.symbol,
+        depth=args.depth,
+        max_files=args.max_files,
+        max_lines=args.max_lines,
+        limit=args.limit,
+        relation_types=args.relations.split(",") if args.relations else None,
+    )
+    if args.format == "json":
+        return _print_json(result)
+    if not result["contexts"]:
+        log(result["warnings"][0])
+        return 1
+    for context in result["contexts"]:
+        target = context["target"]
+        log(f"{target.get('type')} {target.get('name')} "
+            f"[{target.get('file')}:{target.get('line')}]")
+        log(f"  entities: {len(context['entities'])}, relations: "
+            f"{len(context['relations'])}, source lines: {context['source_lines']}")
+        for item in context["source_ranges"]:
+            log(f"  source: {item['file']}:{item['start_line']}-{item['end_line']}")
+        for warning in context.get("warnings", []):
+            log(f"  warning: {warning}")
+    return 0
+
+
+def cmd_impact(args) -> int:
+    retriever = GraphRetriever(GraphStore(args.dir))
+    result = retriever.impact(args.symbol, depth=args.depth, limit=args.limit)
+    if args.format == "json":
+        return _print_json(result)
+    if not result["results"]:
+        log(f"no entity matching {args.symbol!r}")
+        return 1
+    for item in result["results"]:
+        target = item["target"]
+        risk = item["risk"]
+        log(f"{target.get('type')} {target.get('name')} "
+            f"[{target.get('file')}:{target.get('line')}]")
+        log(f"  risk: {risk['level']} ({risk['score']})")
+        log(f"  affected entities: {len(item['affected_entities'])}")
+        log(f"  affected files: {len(item['affected_files'])}")
+        for reason in risk["reasons"]:
+            log(f"  reason: {reason}")
+        for warning in item.get("warnings", []):
+            log(f"  warning: {warning}")
+    return 0
+
+
+def cmd_tools(args) -> int:
+    from .agent_tools import TOOL_DEFINITIONS
+
+    return _print_json({"tools": TOOL_DEFINITIONS})
+
+
 def cmd_info(args) -> int:
     from .clang_capi import Clang
     from .languages import C, CPP
@@ -228,6 +292,28 @@ def build_parser() -> argparse.ArgumentParser:
     query.add_argument("--limit", type=int, default=5)
     query.add_argument("--relations", type=int, default=12)
     query.set_defaults(func=cmd_query)
+
+    context = sub.add_parser("context", help="build bounded AI context from a symbol")
+    context.add_argument("symbol")
+    context.add_argument("-d", "--dir", required=True)
+    context.add_argument("--depth", type=int, default=1)
+    context.add_argument("--max-files", type=int, default=12)
+    context.add_argument("--max-lines", type=int, default=500)
+    context.add_argument("--limit", type=int, default=5)
+    context.add_argument("--relations", help="comma-separated relation types")
+    context.add_argument("--format", choices=["text", "json"], default="text")
+    context.set_defaults(func=cmd_context)
+
+    impact = sub.add_parser("impact", help="analyze bounded change impact")
+    impact.add_argument("symbol")
+    impact.add_argument("-d", "--dir", required=True)
+    impact.add_argument("--depth", type=int, default=2)
+    impact.add_argument("--limit", type=int, default=5)
+    impact.add_argument("--format", choices=["text", "json"], default="text")
+    impact.set_defaults(func=cmd_impact)
+
+    tools = sub.add_parser("tools", help="print provider-neutral AI tool definitions")
+    tools.set_defaults(func=cmd_tools)
 
     info = sub.add_parser("info", help="show the detected toolchain")
     info.set_defaults(func=cmd_info)

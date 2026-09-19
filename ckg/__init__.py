@@ -13,10 +13,14 @@ __version__ = "2.0.0"
 from .config import ProjectConfig
 from .graph_builder import KnowledgeGraph
 from .pipeline import Pipeline, build_from_path
+from .retriever import GraphRetriever
+from .store import GraphStore
 
 __all__ = [
     "ProjectConfig",
     "KnowledgeGraph",
+    "GraphStore",
+    "GraphRetriever",
     "Pipeline",
     "build_from_path",
     "__version__",

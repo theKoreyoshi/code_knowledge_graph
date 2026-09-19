@@ -151,9 +151,14 @@ python -m ckg build <path>              # 零配置建图
 python -m ckg build -c my.json -o out    # 用配置文件建图
 python -m ckg build <path> -j 8          # 8 线程并行
 python -m ckg query <符号> -d out        # 查某个函数/变量/宏的上下游
+python -m ckg context <符号> -d out --format json # 输出 AI 使用的受限上下文
+python -m ckg impact <符号> -d out --format json  # 分析修改影响范围
+python -m ckg tools                       # 导出 AI 工具定义
 python -m ckg viz -d out                 # 只重新生成 HTML
 python -m ckg info                       # 显示识别到的工具链
 ```
+
+AI 集成和工具调用流程见 [docs/05-AI检索集成.md](docs/05-AI检索集成.md)。
 
 ## 目录结构
 
